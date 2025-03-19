@@ -1,0 +1,9 @@
+-------------------------------------------------------------------------------
+Test set: tqs.cucumber.RunCukesTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.125 s <<< FAILURE! - in tqs.cucumber.RunCukesTest
+Basic Library Features.Search for books published between two dates  Time elapsed: 0.059 s  <<< FAILURE!
+java.lang.AssertionError
+	at tqs.bookstore.bookTest.checkResult(bookTest.java:49)
+	at ✽.the search result should contain the book "The Hobbit" by "J.R.R. Tolkien"(classpath:tqs/bookstore/library.feature:7)
+
