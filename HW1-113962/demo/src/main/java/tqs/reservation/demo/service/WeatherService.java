@@ -27,7 +27,7 @@ import com.google.gson.JsonParser;
 public class WeatherService {
     public static int CACHE_REFRESH = 72000;
     private static final Logger logger = LoggerFactory.getLogger(WeatherService.class);
-    private final String apiKey = "efd04ddd8f2a767e6c771a7cdf385966";
+    private final String apiKey = "";
     private final String apiUrl = "https://api.openweathermap.org/data/2.5/forecast";
     @Autowired
     private final RestTemplate restTemplate;
