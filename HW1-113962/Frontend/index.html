@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurants</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-4">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Restaurants Dashboard</h1>
+
+        <!-- Navigation Buttons -->
+        <div class="flex space-x-4 mb-6">
+            <a href="http://127.0.0.1:5500/Frontend/reservationStatus.html"
+                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                Go to Reservation Status
+            </a>
+            <a href="http://127.0.0.1:5500/Frontend/coordinatorPage.html"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Go to Coordinator Page
+            </a>
+        </div>
+    </div>
+    <div x-data="restaurantApp()" class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Restaurants</h1>
+        <ul>
+            <template x-for="restaurant in restaurants" :key="restaurant.id">
+                <li class="bg-white p-4 mb-2 shadow rounded">
+                    <div class="flex justify-between items-center">
+                        <span x-text="restaurant.name"></span>
+                        <button @click="selectRestaurant(restaurant)"
+                            class="bg-blue-500 text-white px-4 py-2 rounded">View Meals</button>
+                    </div>
+                </li>
+            </template>
+        </ul>
+
+        <!-- Meals Section -->
+        <div x-show="selectedRestaurant" class="mt-6">
+            <h2 class="text-xl font-bold mb-2" x-text="'Meals for ' + selectedRestaurant.name"></h2>
+            <label for="day" class="block mb-2">Select Day:</label>
+            <input type="date" id="day" x-model="selectedDay" class="border p-2 rounded mb-4 w-full">
+            <button @click="fetchMeals()" class="bg-green-500 text-white px-4 py-2 rounded">Get Meals</button>
+
+            <div x-show="meals.length > 0" class="mt-4">
+                <h3 class="text-lg font-bold mb-2">Meals</h3>
+
+                <ul>
+                    <template x-for="meal in meals" :key="meal.id">
+                        <li class="bg-white p-4 mb-2 shadow rounded">
+                            <div class="flex flex-col">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold" x-text="meal.name"></span>
+                                    <span x-text="'€' + meal.price"></span>
+                                </div>
+                                <p class="text-gray-600" x-text="meal.description"></p>
+                                <p><strong>Reservation Time:</strong> <span x-text="meal.reservationTime"></span></p>
+                                <p><strong>Available:</strong> <span x-text="meal.available ? 'Yes' : 'No'"></span></p>
+                                <p><strong>Number of Meals:</strong> <span x-text="meal.numberOfMeals"></span></p>
+
+                                <!-- Reserve Button -->
+                                <button @click="reserveMeal(meal)" :disabled="!meal.available"
+                                    :class="meal.available ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400 cursor-not-allowed'"
+                                    class="text-white px-4 py-2 rounded mt-2">
+                                    Reserve
+                                </button>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+
+            <div x-show="weather" class="mt-4">
+                <h3 class="text-lg font-bold mb-2">Weather</h3>
+                <p><strong>Lunch:</strong> <span x-text="weather.lunch"></span></p>
+                <p><strong>Dinner:</strong> <span x-text="weather.dinner"></span></p>
+            </div>
+            <div x-show="showReservationModal"
+                class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+                <div class="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+                    <h2 class="text-lg font-bold mb-4">Reserve Meal</h2>
+                    <label for="customerName" class="block mb-2">Name:</label>
+                    <input type="text" id="customerName" x-model="reservationForm.name"
+                        class="border p-2 rounded mb-4 w-full">
+                    <label for="customerEmail" class="block mb-2">Email:</label>
+                    <input type="email" id="customerEmail" x-model="reservationForm.email"
+                        class="border p-2 rounded mb-4 w-full">
+                    <div class="flex justify-end">
+                        <button @click="showReservationModal = false"
+                            class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
+                        <button @click="submitReservation()"
+                            class="bg-green-500 text-white px-4 py-2 rounded">Reserve</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reservation Code Display -->
+            <div x-show="reservationCode" class="mt-4 bg-green-100 p-4 rounded shadow">
+                <h3 class="text-lg font-bold mb-2">Reservation Successful!</h3>
+                <p>Your reservation code is: <strong x-text="reservationCode"></strong></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function restaurantApp() {
+            return {
+                restaurants: [],
+                selectedRestaurant: null,
+                selectedDay: '',
+                meals: [],
+                weather: null,
+                showReservationModal: false,
+                reservationForm: {
+                    name: '',
+                    email: ''
+                },
+                reservationCode: null,
+                selectedMeal: null,
+
+                async fetchRestaurants() {
+                    const response = await fetch('http://localhost:8080/apiV1/restaurants');
+                    this.restaurants = await response.json();
+                },
+
+                async fetchMeals() {
+                    if (!this.selectedDay) {
+                        alert('Please select a day.');
+                        return;
+                    }
+
+                    // Fetch meals
+                    const response = await fetch(`http://localhost:8080/apiV1/meals/restaurant/date?restaurantId=${this.selectedRestaurant.id}&date=${this.selectedDay}`);
+                    this.meals = await response.json();
+
+                    // Fetch weather
+                    const weatherResponse = await fetch(`http://localhost:8080/apiV1/weather/forecast?latitude=${this.selectedRestaurant.latitude}&longitude=${this.selectedRestaurant.longitude}&day=${this.selectedDay}`);
+                    const weatherData = await weatherResponse.json();
+
+                    // Process weather data for lunch and dinner
+                    this.weather = {
+                        lunch: this.getWeatherForTimeRange(weatherData, "12:00:00", "15:00:00"),
+                        dinner: this.getWeatherForTimeRange(weatherData, "18:00:00", "21:00:00")
+                    };
+                },
+
+                getWeatherForTimeRange(weatherData, startTime, endTime) {
+                    const start = new Date(`${this.selectedDay}T${startTime}`);
+                    const end = new Date(`${this.selectedDay}T${endTime}`);
+
+                    const filteredWeather = weatherData.filter(item => {
+                        const dateTime = new Date(item.dateTime);
+                        return dateTime >= start && dateTime <= end;
+                    });
+
+                    if (filteredWeather.length > 0) {
+                        const avgTemperature = (filteredWeather.reduce((sum, item) => sum + item.temperature, 0) / filteredWeather.length).toFixed(1);
+                        const description = filteredWeather[0].weatherDescription;
+                        return `${avgTemperature}°C, ${description}`;
+                    }
+
+                    return "No data available";
+                },
+
+                reserveMeal(meal) {
+                    this.selectedMeal = meal;
+                    this.showReservationModal = true;
+                },
+
+                async submitReservation(ReservationTime) {
+                    if (!this.reservationForm.name || !this.reservationForm.email) {
+                        alert('Please fill in all fields.');
+                        return;
+                    }
+
+                    const response = await fetch('http://localhost:8080/apiV1/reservations/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            customerName: this.reservationForm.name,
+                            customerEmail: this.reservationForm.email,
+                            reservationTime: this.selectedMeal.reservationTime,
+                            meal: { id: this.selectedMeal.id }
+                        })
+                    });
+
+                    const result = await response.json();
+                    this.reservationCode = result.reservationCode;
+                    this.showReservationModal = false;
+                    this.reservationForm = { name: '', email: '' };
+                    await this.fetchMeals(); // Fetch meals again after reservation
+                },
+
+                selectRestaurant(restaurant) {
+                    this.selectedRestaurant = restaurant;
+                    this.meals = [];
+                    this.weather = null;
+                    this.reservationCode = null;
+                },
+
+                init() {
+                    this.fetchRestaurants();
+                }
+            };
+        }
+    </script>
+</body>
+
+</html>

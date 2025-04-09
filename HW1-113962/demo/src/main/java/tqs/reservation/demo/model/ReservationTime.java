@@ -1,10 +1,8 @@
 package tqs.reservation.demo.model;
 
-public enum ReservationStatus {
-    PENDING,
-    CANCELLED,
-    CONFIRMED,
-    COMPLETED;
+public enum ReservationTime {
+    LUNCH,
+    DINNER;
 
     @Override
     public String toString() {

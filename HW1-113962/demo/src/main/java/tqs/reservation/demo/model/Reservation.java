@@ -1,22 +1,25 @@
 package tqs.reservation.demo.model;
 
-import jakarta.annotation.Generated;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Email;
+import java.security.SecureRandom;
 
+@Entity
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private String reservationCode;
+    private String reservationCode = new SecureRandom().nextInt() + "";
     private String customerName;
     @Email
     private String customerEmail;
-    private ReservationStatus status;
+    private ReservationStatus status = ReservationStatus.PENDING;
+
+    private ReservationTime reservationTime;
 
     @ManyToOne
     private Meal meal;
@@ -25,13 +28,14 @@ public class Reservation {
     }
 
     public Reservation(Long id, String reservationCode, String customerName, String customerEmail,
-            ReservationStatus status, Meal meal) {
+            ReservationStatus status, Meal meal, ReservationTime reservationTime) {
         this.id = id;
         this.reservationCode = reservationCode;
         this.customerName = customerName;
         this.customerEmail = customerEmail;
         this.status = status;
         this.meal = meal;
+        this.reservationTime = reservationTime;
     }
 
     public Long getId() {
@@ -80,6 +84,14 @@ public class Reservation {
 
     public void setMeal(Meal meal) {
         this.meal = meal;
+    }
+
+    public ReservationTime getReservationTime() {
+        return reservationTime;
+    }
+
+    public void setReservationTime(ReservationTime reservationTime) {
+        this.reservationTime = reservationTime;
     }
 
     @Override

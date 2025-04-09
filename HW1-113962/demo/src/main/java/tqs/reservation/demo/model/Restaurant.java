@@ -13,15 +13,16 @@ public class Restaurant {
     private String name;
     private double latitude;
     private double longitude;
+    private int maxCapacity;
 
     public Restaurant() {
     }
 
-    public Restaurant(Long id, String name, double latitude, double longitude) {
-        this.id = id;
+    public Restaurant(String name, double latitude, double longitude, int maxCapacity) {
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.maxCapacity = maxCapacity;
     }
 
     public Long getId() {
@@ -54,6 +55,14 @@ public class Restaurant {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public void setMaxCapacity(int maxCapacity) {
+        this.maxCapacity = maxCapacity;
     }
 
     @Override

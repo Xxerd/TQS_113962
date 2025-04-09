@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinator Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-4">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Coordinator Dashboard</h1>
+
+        <!-- Navigation Buttons -->
+        <div class="flex space-x-4 mb-6">
+            <a href="http://127.0.0.1:5500/Frontend/reservationStatus.html"
+                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                Go to Reservation Status
+            </a>
+            <a href="http://127.0.0.1:5500/Frontend/index.html"
+                class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                Go to Reservation Page
+            </a>
+        </div>
+    </div>
+    <div x-data="coordinatorApp()" class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Coordinator Dashboard</h1>
+
+        <!-- Restaurant ID Input -->
+        <label for="restaurantId" class="block mb-2">Select Restaurant:</label>
+        <select id="restaurantId" x-model="restaurantId" class="border p-2 rounded mb-4 w-full">
+            <option value="" disabled selected>Select a restaurant</option>
+            <template x-for="restaurant in restaurants" :key="restaurant.id">
+                <option :value="restaurant.id" x-text="restaurant.name"></option>
+            </template>
+        </select>
+
+        <!-- Date Input -->
+        <label for="reservationDate" class="block mb-2">Select Date:</label>
+        <input type="date" id="reservationDate" x-model="selectedDate" class="border p-2 rounded mb-4 w-full">
+
+        <!-- Fetch Reservations Button -->
+        <button @click="fetchReservations()" class="bg-blue-500 text-white px-4 py-2 rounded">View Reservations</button>
+
+        <h4 x-show="reservations.length === 0" class="text-gray-500">No reservations found for the selected date and
+            restaurant.</h4>
+        <!-- Reservations List -->
+        <div class="bg-white p-4 mb-4 shadow rounded">
+            <h2 class="text-lg font-bold mb-2">Restaurant Capacity</h2>
+            <p><strong>Current Persons:</strong> <span x-text="currentPersons"></span></p>
+            <p><strong>Max Capacity:</strong> <span x-text="restaurantCapacity"></span></p>
+            <p x-show="isRestaurantFull" class="text-red-500 font-bold">The restaurant is full!</p>
+        </div>
+        <div x-show="reservations.length > 0" class="mt-4">
+            <h2 class="text-lg font-bold mb-2">Lunch Reservations</h2>
+            <ul>
+                <template x-for="reservation in reservations.filter(r => r.meal.reservationTime === 'LUNCH')"
+                    :key="reservation.id">
+                    <li class="bg-white p-4 mb-2 shadow rounded">
+                        <div class="flex flex-col">
+                            <p><strong>Reservation Code:</strong> <span x-text="reservation.reservationCode"></span></p>
+                            <p><strong>Customer Name:</strong> <span x-text="reservation.customerName"></span></p>
+                            <p><strong>Customer Email:</strong> <span x-text="reservation.customerEmail"></span></p>
+                            <p><strong>Status:</strong> <span x-text="reservation.status"></span></p>
+                            <p><strong>Meal:</strong> <span x-text="reservation.meal.name"></span></p>
+                            <p><strong>Meal Description:</strong> <span x-text="reservation.meal.description"></span>
+                            </p>
+                            <p><strong>Meal Price:</strong> €<span x-text="reservation.meal.price"></span></p>
+                            <p><strong>Restaurant:</strong> <span x-text="reservation.meal.restaurant.name"></span></p>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end mt-4 space-x-2">
+                            <!-- Confirm Button -->
+                            <button @click="markAsConfirmed(reservation.reservationCode)"
+                                :disabled="reservation.status !== 'PENDING' || isRestaurantFull"
+                                :class="reservation.status === 'PENDING' && !isRestaurantFull ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400 cursor-not-allowed'"
+                                class="text-white px-4 py-2 rounded">
+                                Confirm
+                            </button>
+
+                            <!-- Complete Button -->
+                            <button @click="markAsCompleted(reservation.reservationCode)"
+                                :disabled="reservation.status !== 'CONFIRMED'"
+                                :class="reservation.status === 'CONFIRMED' ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-400 cursor-not-allowed'"
+                                class="text-white px-4 py-2 rounded">
+                                Complete
+                            </button>
+
+                            <!-- Cancel Button -->
+                            <button @click="cancelReservation(reservation.reservationCode)"
+                                :disabled="reservation.status !== 'PENDING'"
+                                :class="reservation.status === 'PENDING' ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-400 cursor-not-allowed'"
+                                class="text-white px-4 py-2 rounded">
+                                Cancel
+                            </button>
+                        </div>
+                    </li>
+                </template>
+            </ul>
+        </div>
+
+        <div x-show="reservations.length > 0" class="mt-4">
+            <h2 class="text-lg font-bold mb-2">Dinner Reservations</h2>
+            <ul>
+                <template x-for="reservation in reservations.filter(r => r.meal.reservationTime === 'DINNER')"
+                    :key="reservation.id">
+                    <li class="bg-white p-4 mb-2 shadow rounded">
+                        <div class="flex flex-col">
+                            <p><strong>Reservation Code:</strong> <span x-text="reservation.reservationCode"></span></p>
+                            <p><strong>Customer Name:</strong> <span x-text="reservation.customerName"></span></p>
+                            <p><strong>Customer Email:</strong> <span x-text="reservation.customerEmail"></span></p>
+                            <p><strong>Status:</strong> <span x-text="reservation.status"></span></p>
+                            <p><strong>Meal:</strong> <span x-text="reservation.meal.name"></span></p>
+                            <p><strong>Meal Description:</strong> <span x-text="reservation.meal.description"></span>
+                            </p>
+                            <p><strong>Meal Price:</strong> €<span x-text="reservation.meal.price"></span></p>
+                            <p><strong>Restaurant:</strong> <span x-text="reservation.meal.restaurant.name"></span></p>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end mt-4 space-x-2">
+                            <!-- Confirm Button -->
+                            <button @click="markAsConfirmed(reservation.reservationCode)"
+                                :disabled="reservation.status !== 'PENDING' || isRestaurantFull"
+                                :class="reservation.status === 'PENDING' && !isRestaurantFull ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400 cursor-not-allowed'"
+                                class="text-white px-4 py-2 rounded">
+                                Confirm
+                            </button>
+
+                            <!-- Complete Button -->
+                            <button @click="markAsCompleted(reservation.reservationCode)"
+                                :disabled="reservation.status !== 'CONFIRMED'"
+                                :class="reservation.status === 'CONFIRMED' ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-400 cursor-not-allowed'"
+                                class="text-white px-4 py-2 rounded">
+                                Complete
+                            </button>
+
+                            <!-- Cancel Button -->
+                            <button @click="cancelReservation(reservation.reservationCode)"
+                                :disabled="reservation.status !== 'PENDING'"
+                                :class="reservation.status === 'PENDING' ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-400 cursor-not-allowed'"
+                                class="text-white px-4 py-2 rounded">
+                                Cancel
+                            </button>
+                        </div>
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function coordinatorApp() {
+            return {
+                restaurantId: '',
+                selectedDate: '',
+                reservations: [],
+                isRestaurantFull: false,
+                restaurantCapacity: 0,
+                currentPersons: 0,
+
+                async fetchRestaurants() {
+                    const response = await fetch('http://localhost:8080/apiV1/restaurants');
+                    this.restaurants = await response.json();
+                },
+
+                async fetchReservations() {
+                    if (!this.restaurantId || !this.selectedDate) {
+                        alert('Please provide both a restaurant ID and a date.');
+                        return;
+                    }
+
+                    const response = await fetch(`http://localhost:8080/apiV1/reservations/restaurant/date?restaurantId=${this.restaurantId}&date=${this.selectedDate}`);
+                    this.reservations = await response.json();
+
+                    // Fetch the number of persons in the restaurant
+                    await this.fetchRestaurantCapacity();
+                },
+
+                async fetchRestaurantCapacity() {
+                    const response = await fetch(`http://localhost:8080/apiV1/restaurants/capacity?restaurantId=${this.restaurantId}&date=${this.selectedDate}&time=lunch`);
+                    const [currentPersons, maxCapacity] = await response.json();
+                    this.currentPersons = currentPersons;
+                    this.restaurantCapacity = maxCapacity;
+                    this.isRestaurantFull = currentPersons >= maxCapacity;
+                },
+
+                async markAsConfirmed(reservationCode) {
+                    await fetch(`http://localhost:8080/apiV1/reservations/update/${reservationCode}?status=CONFIRMED`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                    await this.fetchReservations(); // Refresh reservations and capacity
+                },
+
+                async markAsCompleted(reservationCode) {
+                    await fetch(`http://localhost:8080/apiV1/reservations/update/${reservationCode}?status=COMPLETED`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                    await this.fetchReservations(); // Refresh reservations and capacity
+                },
+
+                async cancelReservation(reservationCode) {
+                    await fetch(`http://localhost:8080/apiV1/reservations/update/${reservationCode}?status=CANCELLED`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                    await this.fetchReservations(); // Refresh reservations and capacity
+                },
+
+                init() {
+                    this.fetchRestaurants();
+                }
+            };
+        }
+    </script>
+</body>
+
+</html>

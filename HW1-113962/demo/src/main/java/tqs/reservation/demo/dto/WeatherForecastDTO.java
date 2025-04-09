@@ -1,5 +1,6 @@
 package tqs.reservation.demo.dto;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class WeatherForecastDTO {
@@ -8,19 +9,19 @@ public class WeatherForecastDTO {
     private String weatherDescription;
     private int cloudPercentage;
     private double windSpeed;
-    private int timestamp;
+    private Instant creationTime = Instant.now();
 
     public WeatherForecastDTO() {
     }
 
     public WeatherForecastDTO(LocalDateTime dateTime, double temperature, String weatherDescription,
-            int cloudPercentage, double windSpeed, int timestamp) {
+            int cloudPercentage, double windSpeed) {
         this.dateTime = dateTime;
         this.temperature = temperature;
         this.weatherDescription = weatherDescription;
         this.cloudPercentage = cloudPercentage;
         this.windSpeed = windSpeed;
-        this.timestamp = timestamp;
+        this.creationTime = Instant.now();
     }
 
     public LocalDateTime getDateTime() {
@@ -63,12 +64,12 @@ public class WeatherForecastDTO {
         this.windSpeed = windSpeed;
     }
 
-    public int getTimestamp() {
-        return timestamp;
+    public Instant getCreationTime() {
+        return creationTime;
     }
 
-    public void setTimestamp(int timestamp) {
-        this.timestamp = timestamp;
+    public void setCreationTime(Instant creationTime) {
+        this.creationTime = creationTime;
     }
 
     @Override

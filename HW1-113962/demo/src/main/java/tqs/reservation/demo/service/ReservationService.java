@@ -5,7 +5,11 @@ import org.springframework.stereotype.Service;
 
 import tqs.reservation.demo.model.Reservation;
 import tqs.reservation.demo.model.ReservationStatus;
+import tqs.reservation.demo.model.ReservationTime;
 import tqs.reservation.demo.repository.ReservationRepository;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -20,6 +24,10 @@ public class ReservationService {
 
     public Reservation getReservationById(Long id) {
         return reservationRepository.findById(id).orElse(null);
+    }
+
+    public List<Reservation> getReservationsByUserEmail(String email) {
+        return reservationRepository.findBycustomerEmail(email);
     }
 
     public Reservation getReservationByReservationCode(String reservationCode) {
@@ -46,6 +54,21 @@ public class ReservationService {
             reservationRepository.save(reservation);
         }
         return reservation;
+    }
+
+    public List<Reservation> getReservationByRestaurantAndDay(Long restaurantId, LocalDate day) {
+        return reservationRepository.findByRestaurantAndDay(restaurantId, day);
+    }
+
+    public int getNumberOfPersonsOnRestaurant(Long restaurantId, LocalDate time, ReservationTime reservationTime) {
+        List<Reservation> existingReservations = getReservationByRestaurantAndDay(restaurantId,
+                time)
+                .stream()
+                .filter(r -> r.getReservationTime().equals(reservationTime)
+                        && r.getStatus() == ReservationStatus.CONFIRMED)
+                .toList();
+        return  existingReservations.size();
+
     }
 
 }
