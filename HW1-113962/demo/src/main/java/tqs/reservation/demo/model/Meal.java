@@ -2,24 +2,36 @@ package tqs.reservation.demo.model;
 
 import java.time.LocalDate;
 
+import io.micrometer.common.lang.NonNull;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 @Entity
 public class Meal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotNull
     private String name;
+    @NotNull
     private String description;
+    @Column(nullable = false)
+    @NotNull(message = "Price cannot be null")
+    @Positive(message = "Price must be positive")
     private double price;
+    @NotNull
     private LocalDate date;
+    @NotNull
     private ReservationTime reservationTime;
+    @NotNull
     private int numberOfMeals;
-
+    @NotNull
     @ManyToOne
     private Restaurant restaurant;
 
@@ -74,6 +86,9 @@ public class Meal {
     }
 
     public void setDate(LocalDate date) {
+        if (date.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Date cannot be in the past");
+        }
         this.date = date;
     }
 

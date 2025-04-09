@@ -25,14 +25,14 @@ import com.google.gson.JsonParser;
 
 @Service
 public class WeatherService {
-    private static final int CACHE_REFRESH = 72000;
+    public static int CACHE_REFRESH = 72000;
     private static final Logger logger = LoggerFactory.getLogger(WeatherService.class);
-    private final String apiKey = "";
+    private final String apiKey = "efd04ddd8f2a767e6c771a7cdf385966";
     private final String apiUrl = "https://api.openweathermap.org/data/2.5/forecast";
     @Autowired
     private final RestTemplate restTemplate;
 
-    private final Map<String, List<WeatherForecastDTO>> cache = new HashMap<>();
+    public Map<String, List<WeatherForecastDTO>> cache = new HashMap<>();
     private int totalRequests = 0;
     private int cacheHits = 0;
     private int cacheMisses = 0;
@@ -60,7 +60,6 @@ public class WeatherService {
                 logger.info("Cache expired for key: {}", cacheKey);
                 cache.remove(cacheKey);
             }
-            return cache.get(cacheKey);
         }
         String response = restTemplate.getForObject(url, String.class);
         if (response == null) {
@@ -97,7 +96,7 @@ public class WeatherService {
         return forecasts;
     }
 
-    private String generateCacheKey(double latitude, double longitude, LocalDate day) {
+    public String generateCacheKey(double latitude, double longitude, LocalDate day) {
         return latitude + "," + longitude + "," + day.toString();
     }
 
@@ -123,6 +122,15 @@ public class WeatherService {
 
     public int getCacheMisses() {
         return cacheMisses;
+    }
+
+    public void clearCache() {
+        cache.clear();
+
+        totalRequests = 0;
+        cacheHits = 0;
+        cacheMisses = 0;
+        logger.info("Cache cleared");
     }
 
 }

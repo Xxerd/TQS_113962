@@ -26,6 +26,12 @@ public class WeatherController {
     public ResponseEntity<List<WeatherForecastDTO>> getWeatherForecast(@RequestParam double latitude,
             @RequestParam double longitude,
             @RequestParam LocalDate day) {
+        if (day.isBefore(LocalDate.now()) || day.isAfter(LocalDate.now().plusDays(4))) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            return ResponseEntity.badRequest().body(null);
+        }
         List<WeatherForecastDTO> forecast = weatherService.getWeatherForecast(latitude, longitude, day);
 
         if (forecast == null) {

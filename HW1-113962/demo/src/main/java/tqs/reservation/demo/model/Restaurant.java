@@ -1,18 +1,25 @@
 package tqs.reservation.demo.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Restaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
+    @NotNull(message = "Name cannot be null")
     private String name;
+    @NotNull
     private double latitude;
+    @NotNull
     private double longitude;
+    @NotNull
     private int maxCapacity;
 
     public Restaurant() {

@@ -6,6 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+
 import java.security.SecureRandom;
 
 @Entity
@@ -14,11 +16,13 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String reservationCode = new SecureRandom().nextInt() + "";
+    @NotNull
     private String customerName;
     @Email
     private String customerEmail;
+    @NotNull
     private ReservationStatus status = ReservationStatus.PENDING;
-
+    @NotNull
     private ReservationTime reservationTime;
 
     @ManyToOne

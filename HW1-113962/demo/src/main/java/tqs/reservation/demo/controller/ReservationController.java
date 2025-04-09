@@ -121,7 +121,11 @@ public class ReservationController {
     @PostMapping("/create")
     @Operation(summary = "Create a new reservation")
     public ResponseEntity<?> createReservation(@RequestBody Reservation reservation) {
+        if (reservation.getMeal() == null || reservation.getMeal().getId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Meal ID is required");
+        }
         Meal meal = mealService.getMealById(reservation.getMeal().getId());
+        
         if (!meal.isAvailable()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Meal not available");
         }

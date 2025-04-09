@@ -33,7 +33,7 @@ public class DataInitializer implements CommandLineRunner {
                                                 "Prato tradicional português com bacalhau desfiado, batata palha e ovos",
                                                 12.5, Cantina, LocalDate.of(2025, 4, 10), 2, ReservationTime.LUNCH));
                 mealRepository.save(new Meal("Arroz de Polvo", "Arroz cremoso com polvo tenro e coentros frescos", 14.9,
-                                Cantina, LocalDate.of(2025, 4, 11), 2, ReservationTime.LUNCH));
+                                Cantina, LocalDate.of(2025, 4, 11), 20, ReservationTime.LUNCH));
                 mealRepository.save(new Meal("Bitoque de Novilho",
                                 "Bife de novilho com ovo estrelado, arroz e batata frita",
                                 13.75, Refeitorio, LocalDate.of(2025, 4, 10), 2, ReservationTime.LUNCH));
@@ -41,7 +41,7 @@ public class DataInitializer implements CommandLineRunner {
                                 .save(new Meal("Caldo Verde",
                                                 "Sopa tradicional portuguesa com couve galega e rodelas de chouriço",
                                                 6.5,
-                                                Refeitorio, LocalDate.of(2025, 4, 11), 2, ReservationTime.LUNCH));
+                                                Refeitorio, LocalDate.of(2025, 4, 11), 20, ReservationTime.LUNCH));
 
         }
 }

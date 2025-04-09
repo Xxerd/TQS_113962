@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,15 +43,12 @@ public class MealController {
     @Operation(summary = "Get meals by restaurant ID")
     public ResponseEntity<List<Meal>> getMealsByRestaurantId(@RequestParam Long restaurantId) {
         List<Meal> meals = mealService.getMealsByRestaurantId(restaurantId);
-        if (meals.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         return ResponseEntity.status(HttpStatus.OK).body(meals);
     }
 
     @PostMapping("/create")
     @Operation(summary = "Create a new meal")
-    public ResponseEntity<Meal> createMeal(@RequestBody Meal meal) {
+    public ResponseEntity<Meal> createMeal(@Valid @RequestBody Meal meal) {
         Meal createdMeal = mealService.createMeal(meal);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdMeal);
     }

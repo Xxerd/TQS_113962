@@ -23,6 +23,9 @@ public class ReservationService {
     }
 
     public Reservation getReservationById(Long id) {
+        if (id == null || id <= 0) {
+            return null;
+        }
         return reservationRepository.findById(id).orElse(null);
     }
 
@@ -67,7 +70,7 @@ public class ReservationService {
                 .filter(r -> r.getReservationTime().equals(reservationTime)
                         && r.getStatus() == ReservationStatus.CONFIRMED)
                 .toList();
-        return  existingReservations.size();
+        return existingReservations.size();
 
     }
 

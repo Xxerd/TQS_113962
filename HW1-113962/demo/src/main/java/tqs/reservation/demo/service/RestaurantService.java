@@ -18,18 +18,19 @@ public class RestaurantService {
     @Autowired
     private RestaurantRepository restaurantRepository;
 
-
     public List<Restaurant> getAllRestaurants() {
         return restaurantRepository.findAll();
     }
 
     public Restaurant getRestaurantById(Long id) {
+        if (id == null || id <= 0) {
+            return null;
+        }
         return restaurantRepository.findById(id).orElse(null);
     }
 
     public Restaurant createRestaurant(Restaurant restaurant) {
         return restaurantRepository.save(restaurant);
     }
-
 
 }
